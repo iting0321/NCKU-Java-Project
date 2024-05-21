@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="98dp"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/more_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="14dp"
+            android:layout_marginRight="11dp"
+            android:background="@drawable/round_button"
+            android:foreground="@drawable/more_button"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="351dp" />
+
+        <Button
+            android:id="@+id/settings_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="11dp"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/round_button"
+            android:foreground="@drawable/settings_button" />
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="724dp"
+        android:orientation="vertical">
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:orientation="vertical">
+
+
+        <Button
+            android:id="@+id/calendar_add_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="35.166dp"
+            android:layout_marginBottom="17dp"
+            android:background="@drawable/round_button"
+            android:foreground="@drawable/calendar_add_button"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="675dp" />
+
+        <Button
+            android:id="@+id/schedule_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="110.33dp"
+            android:layout_marginBottom="17dp"
+            android:background="@drawable/round_button"
+            android:foreground="@drawable/schedule_button"
+            tools:layout_editor_absoluteX="102dp"
+            tools:layout_editor_absoluteY="675dp" />
+        <Button
+            android:id="@+id/review_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/round_button"
+            android:foreground="@drawable/review_button"
+            tools:layout_editor_absoluteX="185dp"
+            tools:layout_editor_absoluteY="675dp" />
+
+
+        <Button
+            android:id="@+id/record_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="260.666dp"
+            android:layout_marginBottom="17dp"
+            android:background="@drawable/round_button"
+            android:foreground="@drawable/record_button"
+            tools:layout_editor_absoluteX="273dp"
+            tools:layout_editor_absoluteY="675dp" />
+
+        <Button
+            android:id="@+id/todo_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="36dp"
+            android:layout_marginBottom="17dp"
+            android:background="@drawable/round_button"
+            android:foreground="@drawable/todo_button"
+            tools:layout_editor_absoluteX="355dp"
+            tools:layout_editor_absoluteY="675dp" />
+
+
+    </RelativeLayout>
+
+
+</LinearLayout>
