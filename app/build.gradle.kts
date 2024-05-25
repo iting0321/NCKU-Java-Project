@@ -37,13 +37,21 @@ android {
 dependencies {
 
     implementation(libs.appcompat)
+//    implementation ("com.github.Android-library-copy-dependencies:SwipeRevealLayout:Tag")
     implementation(libs.material)
     implementation(libs.constraintlayout)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    implementation(libs.activity)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+//    implementation ("com.github.User:Repo:Tag")
 }
+
+
+//dependencies {
+//    implementation ("com.github.User:Repo:Tag")
+//}
