@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.activity)
     testImplementation(libs.junit)
+    implementation ("androidx.fragment:fragment:1.3.0-alpha08")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 //    implementation ("com.github.User:Repo:Tag")

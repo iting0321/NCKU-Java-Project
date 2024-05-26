@@ -1,4 +1,4 @@
-package com.example.project_ui;
+package com.example.project_ui.ui.notifications;
 
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -6,6 +6,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+
+import com.example.project_ui.MainActivity;
+import com.example.project_ui.R;
 
 public class SplashActivity extends AppCompatActivity {
 

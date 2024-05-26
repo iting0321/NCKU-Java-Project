@@ -7,6 +7,7 @@
     tools:context=".ui.notifications.NotificationsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/tasksRecyclersView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:layout_editor_absoluteX="57dp"
@@ -16,11 +17,13 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
         android:layout_margin="32dp"
+        android:layout_marginStart="28dp"
         android:backgroundTint="@android:color/holo_green_dark"
         android:src="@drawable/ic_baseline_add"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="251dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
