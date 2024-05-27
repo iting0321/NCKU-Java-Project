@@ -8,6 +8,7 @@ pluginManagement {
             }
         }
         mavenCentral()
+
         gradlePluginPortal()
     }
 }
@@ -16,9 +17,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }  // 加了這行
     }
 }
 
 rootProject.name = "Project_UI"
-include(":app")
- 
+include(":app", ":locktableview")
