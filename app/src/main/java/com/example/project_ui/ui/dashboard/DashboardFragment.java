@@ -45,9 +45,6 @@ public class DashboardFragment extends Fragment {
         View root = binding.getRoot();
         recordLayout = root.findViewById(R.id.contentView_dashboard);
         run1();
-        
-        final TextView textView = binding.textDashboard;
-        dashboardViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;
     }
 
