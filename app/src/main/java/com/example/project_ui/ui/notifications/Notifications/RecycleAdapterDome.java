@@ -25,6 +25,7 @@ public class RecycleAdapterDome extends RecyclerView.Adapter<RecycleAdapterDome.
     public MyViewHolder onCreateViewHolder(ViewGroup parent,int viewType){
         inflater= LayoutInflater.from(context).inflate(R.layout.item_dome,parent,false);
         MyViewHolder myViewHolder = new MyViewHolder(inflater);
+        
         return myViewHolder;
     }
 

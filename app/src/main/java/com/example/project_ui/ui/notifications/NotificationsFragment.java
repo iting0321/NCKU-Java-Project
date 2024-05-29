@@ -36,7 +36,7 @@ public class NotificationsFragment extends Fragment {
         View view=inflater.inflate(R.layout.fragment_notifications,container,false);
         recyclerView=(RecyclerView) view.findViewById(R.id.recycler_view);
         list=new ArrayList<>();
-        for(int i=0;i<10;++i){
+        for(int i=0;i<100;++i){
             list.add("This is test"+i);
         }
         adapterDome=new RecycleAdapterDome(context,list);
@@ -49,12 +49,6 @@ public class NotificationsFragment extends Fragment {
         NotificationsViewModel notificationsViewModel =
                 new ViewModelProvider(this).get(NotificationsViewModel.class);
 
-        //binding = FragmentNotificationsBinding.inflate(inflater, container, false);
-        //View root = binding.getRoot();
-        //recyclerView=root.findViewById(R.id.recycler_view);
-        //run();
-        /*final TextView textView = binding.test_line;
-        notificationsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);*/
         return view;
 
 
