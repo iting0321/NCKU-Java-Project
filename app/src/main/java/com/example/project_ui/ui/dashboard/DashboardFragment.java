@@ -1,13 +1,17 @@
 package com.example.project_ui.ui.dashboard;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -28,7 +32,9 @@ import com.rmondjone.locktableview.DisplayUtil;
 import com.rmondjone.xrecyclerview.ProgressStyle;
 import com.rmondjone.xrecyclerview.XRecyclerView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 
 public class DashboardFragment extends Fragment {
@@ -58,14 +64,34 @@ public class DashboardFragment extends Fragment {
 
         initDisplayOpinion();
 
+        /*
+          初始化資料。(80 ~ 104行)
+          可能使用if判斷式，若此時資料為空則以底下方式載入並匯出至資料庫，有資料(ex: date存入)後改以資料庫匯入。
+             0  1
+          0  Time  Record
+          1  NULL  date
+          2  0~1   NULL
+          3  1~2   NULL
+          .
+          .
+          .
+          25 23~24 NULL
+          26 NULL  NULL
+          因為最底下按鈕會擋到，所以新增index 26確保可檢視完整時段
+        */
+
         ArrayList<ArrayList<String>> record_from = new ArrayList<ArrayList<String>>();
         ArrayList<String> first_row2 = new ArrayList<String>();
-        first_row2.add("時段");
-        first_row2.add("紀錄");
+        first_row2.add("Time");
+        first_row2.add("Record");
         record_from.add(first_row2);
         ArrayList<String> Date_row = new ArrayList<String>();
         Date_row.add("");
-        Date_row.add("");
+        String format = "yyyy / MM / dd";
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat date_format = new SimpleDateFormat(format);
+        String date = date_format.format(c.getTime());
+        Date_row.add(date);//Date_catch
         record_from.add(Date_row);
         for(int i = 0; i <= 24; i++){
             ArrayList<String> row_list = new ArrayList<String>();
@@ -78,8 +104,8 @@ public class DashboardFragment extends Fragment {
             }
             row_list.add("");///////////////////////////////data_input
             record_from.add(row_list);
-
         }
+
         DisplayMetrics displayMetrics = new DisplayMetrics();
         WindowManager windowManager = (WindowManager)requireContext().getSystemService(Context.WINDOW_SERVICE);
         windowManager.getDefaultDisplay().getMetrics(displayMetrics);
@@ -92,7 +118,8 @@ public class DashboardFragment extends Fragment {
         record_table.setMinRowHeight(45);
         record_table.setMaxRowHeight(45);
         record_table.setColumnWidth(0, screenWidthDp / 2);
-        record_table.setColumnWidth(1, screenWidthDp / 2);
+        record_table.setColumnWidth(1, screenWidthDp * 57 / 128);
+        record_table.setTableContentTextColor(R.color.black);
         record_table.setCellPadding(0);
         record_table.setNullableString("");
         record_table.setOnLoadingListener(new LockTableView.OnLoadingListener() {
@@ -118,20 +145,20 @@ public class DashboardFragment extends Fragment {
         record_table.setOnItemClickListenter(new LockTableView.OnItemClickListenter() {
             @Override
             public void onItemClick(View view, int i) {
-                if(i == 0){
-                    String record_time = "日期";
-                    String record_Text = record_from.get(i).get(1);
-                    messageBox(record_time, record_Text);
+                if(i == 1){
+                    callCalendar(view, record_from, record_table);
                 }
-                else if(i != 24){
-                    String record_time = record_from.get(i).get(0);
-                    String record_Text = record_from.get(i).get(1);
-                    messageBox(record_time, record_Text);
+                else if(i != 26 && i != 0){
+                    LayoutInflater inf = LayoutInflater.from(requireContext());
+                    final View dialog = inf.inflate(R.layout.pop_up_window, null);
+                    if(record_from.get(i).get(1).isEmpty()){//無事件則出現填寫視窗
+
+                        callDialog(record_from, dialog, i, record_table);
+                    }
+                    else{
+                        messageBox(record_from, dialog, i, record_table);
+                    }
                 }
-
-
-                // 显示完整文本
-
             }
         });
         record_table.show();
@@ -151,11 +178,85 @@ public class DashboardFragment extends Fragment {
     }
 
     ///////////////
-    private void messageBox(String title, String msg) {
-        new AlertDialog.Builder(requireContext())
-                .setTitle(title)
-                .setMessage(msg)
-                .setPositiveButton("OK", null)
-                .show();
+    private void messageBox(ArrayList<ArrayList<String>> data, View v, int row, LockTableView ltb) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(data.get(row).get(0));
+        builder.setMessage(data.get(row).get(1));
+        builder.setIcon(R.drawable.messagebox_record);
+        builder.setPositiveButton("OK", null);
+        builder.setNegativeButton("Edit", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                callDialog(data, v, row, ltb);
+            }
+        });
+        builder.setNeutralButton("Delete", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                AlertDialog.Builder delete_record = new AlertDialog.Builder(requireContext());
+                delete_record.setIcon(R.drawable.warning_icon);
+                delete_record.setTitle("Warning：");
+                delete_record.setMessage("Data cannot be recovered after deletion.");
+                delete_record.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        data.get(row).set(1, "");
+                        ltb.setTableDatas(data);
+                    }
+                });
+                delete_record.setNeutralButton("Cancel", null);
+                delete_record.show();
+            }
+
+        });
+        builder.show();
+    }
+
+    private void callDialog(ArrayList<ArrayList<String>> data, View view, int row, LockTableView ltb){
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setCancelable(true);
+        builder.setIcon(R.drawable.edit_icon);
+        builder.setTitle(data.get(row).get(0));
+        builder.setView(view);
+        EditText editText = (EditText) view.findViewById(R.id.event_text);
+        if(!data.get(row).get(1).isEmpty()){
+            editText.setText(data.get(row).get(1));
+        }
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                data.get(row).set(1, editText.getText().toString());
+                ltb.setTableDatas(data);
+            }
+        });
+        builder.setNeutralButton("取消", null);
+        builder.show();
+    }
+
+    private  void callCalendar(View view, ArrayList<ArrayList<String>> data, LockTableView ltb){
+        Calendar calendar = Calendar.getInstance();
+        new DatePickerDialog(requireContext(), new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                ////////////////取得該日期之數據
+
+                String m, d;
+                if((month + 1) < 10){
+                    m = "0" + String.valueOf(month + 1);
+                }
+                else{
+                    m = String.valueOf(month + 1);
+                }
+                if(dayOfMonth < 10){
+                    d = "0" + String.valueOf(dayOfMonth);
+                }
+                else{
+                    d = String.valueOf(dayOfMonth);
+                }
+                data.get(1).set(1, year + " / " + m + " / " + d); //若無該日期則為空資料串，新增此數據
+                ltb.setTableDatas(data);
+            }
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE)).show();
     }
 }
