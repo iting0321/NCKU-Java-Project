@@ -1,10 +1,11 @@
-package com.example.myapplicationtest20240522.RoomDataBase.Todo;
+package com.example.project_ui.RoomDataBase.Todo;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Dao
@@ -21,12 +22,8 @@ public interface TodoDao {
     @Query("SELECT * FROM " + tableName + " WHERE id = :id")
     TodoEvents getById(int id);
 
-    // update
-    @Query("UPDATE " + tableName + " SET id = :id")
-    void updateById(int id);
-
     // delete
-    @Query("DELETE  FROM " + tableName + " WHERE id = :id")
-    void deleteData(int id);
+    @Query("DELETE  FROM " + tableName + " WHERE event = :event")
+    void deleteData(String event);
 
 }

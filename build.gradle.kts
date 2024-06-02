@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
 }
 buildscript {
-    val kotlin_version by extra("1.6.20")
+    val kotlin_version by extra("1.6.0")
     val nav_version by extra("2.4.1")
     val room_version by extra("2.6.1")
 

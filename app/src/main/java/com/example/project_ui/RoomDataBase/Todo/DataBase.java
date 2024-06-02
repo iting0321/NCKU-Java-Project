@@ -1,4 +1,4 @@
-package com.example.myapplicationtest20240522.RoomDataBase.Todo;
+package com.example.project_ui.RoomDataBase.Todo;
 
 import android.content.Context;
 
@@ -25,8 +25,6 @@ DataBase extends RoomDatabase {
 
 
     private static DataBase create(final Context context){
-        return Room.databaseBuilder(context,DataBase.class,DB_NAME).build();
+        return Room.databaseBuilder(context,DataBase.class,DB_NAME).allowMainThreadQueries().build();
     }
-
-
 }

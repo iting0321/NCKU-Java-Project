@@ -3,6 +3,7 @@ package com.example.project_ui;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 
+import com.facebook.stetho.Stetho;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,12 +16,17 @@ import com.rmondjone.locktableview.LockTableView;
 
 import java.util.ArrayList;
 
+import android.content.Context;
+
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Stetho Init    // delete
+        // Stetho.initializeWithDefaults(this);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -36,5 +42,4 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.navView, navController);
 
     }
-
 }

@@ -6,10 +6,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -21,9 +23,12 @@ import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.room.Room;
 
 import android.util.DisplayMetrics;
 import com.example.project_ui.R;
+import com.example.project_ui.RoomDataBase.Record.RecordDao;
+import com.example.project_ui.RoomDataBase.Record.RecordEvents;
 import com.example.project_ui.databinding.FragmentDashboardBinding;
 import com.example.project_ui.databinding.FragmentHomeBinding;
 import com.example.project_ui.ui.dashboard.DashboardViewModel;
@@ -35,12 +40,20 @@ import com.rmondjone.xrecyclerview.XRecyclerView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+
+import com.example.project_ui.RoomDataBase.Record.DataBase;
+
+import com.example.project_ui.RoomDataBase.Record.Converters;
 
 
 public class DashboardFragment extends Fragment {
 
     private FragmentDashboardBinding binding;
     private LinearLayout recordLayout;
+
+    private RecordDao recordDao;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         DashboardViewModel dashboardViewModel =
@@ -50,6 +63,10 @@ public class DashboardFragment extends Fragment {
 
         View root = binding.getRoot();
         recordLayout = root.findViewById(R.id.contentView_dashboard);
+
+        DataBase db = Room.databaseBuilder(getContext(),DataBase.class, "RecordData.db").build();
+        recordDao = db.recordDao();
+
         run1();
         return root;
     }
@@ -91,6 +108,8 @@ public class DashboardFragment extends Fragment {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat date_format = new SimpleDateFormat(format);
         String date = date_format.format(c.getTime());
+
+
         Date_row.add(date);//Date_catch
         record_from.add(Date_row);
         for(int i = 0; i <= 24; i++){
@@ -104,6 +123,18 @@ public class DashboardFragment extends Fragment {
             }
             row_list.add("");///////////////////////////////data_input
             record_from.add(row_list);
+        }
+
+        // load if data of today exists
+        new Thread(() -> {
+            if(recordDao.getByDate(date) != null) {
+                cloneArrArr(Converters.fromString(recordDao.getByDate(date).event), record_from);
+            }
+        }).start();
+        try {
+            Thread.sleep(30);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -201,6 +232,10 @@ public class DashboardFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         data.get(row).set(1, "");
+                        // TODO: delete from database
+                        new Thread(() -> {
+                            recordDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
+                        }).start();
                         ltb.setTableDatas(data);
                     }
                 });
@@ -227,6 +262,13 @@ public class DashboardFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
 
                 data.get(row).set(1, editText.getText().toString());
+                // TODO: add to database
+                new Thread(() -> {
+                    if(recordDao.getByDate(data.get(1).get(1)) == null)
+                        recordDao.insertData(data.get(1).get(1), Converters.fromArrayList(data));
+                    else
+                        recordDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
+                }).start();
                 ltb.setTableDatas(data);
             }
         });
@@ -255,8 +297,28 @@ public class DashboardFragment extends Fragment {
                     d = String.valueOf(dayOfMonth);
                 }
                 data.get(1).set(1, year + " / " + m + " / " + d); //若無該日期則為空資料串，新增此數據
+
+                // load data if exists
+                new Thread(() -> {
+                    if(recordDao.getByDate(data.get(1).get(1)) == null) {
+                        for (int i = 2; i <= 26; i++)
+                            data.get(i).set(1, "");
+                    }else {
+                        cloneArrArr(Converters.fromString(recordDao.getByDate(data.get(1).get(1)).event), data);
+                    }
+                }).start();
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 ltb.setTableDatas(data);
             }
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE)).show();
+    }
+    private void cloneArrArr(ArrayList<ArrayList<String>> src, ArrayList<ArrayList<String>>des){
+        for(int i=0; i<27; i++){
+            des.set(i, (ArrayList<String>)src.get(i).clone());
+        }
     }
 }

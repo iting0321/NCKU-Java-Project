@@ -1,19 +1,22 @@
-package com.example.myapplicationtest20240522.RoomDataBase.Record;
+package com.example.project_ui.RoomDataBase.Record;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.annotation.NonNull;
 
-@Entity(tableName = "TodoEvents")
+@Entity(tableName = "RecordEvents")
 public class RecordEvents {
-    @PrimaryKey(autoGenerate = true)
-    private int id;
-    private String event;
+    @PrimaryKey
+    @NonNull
+    public String date;
 
-    public RecordEvents(String event) {
+    public String event;
+    public RecordEvents(String date, String event) {
+        this.date = date;
         this.event = event;
     }
-    public int getId() {
-        return id;
+    public String getDate() {
+        return date;
     }
     public String getEvent() {
         return event;

@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.room.Room;
 
 import android.util.DisplayMetrics;
 import com.example.project_ui.R;
@@ -38,12 +39,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import com.example.project_ui.RoomDataBase.Plan.PlanDao;
+import com.example.project_ui.RoomDataBase.Plan.PlanEvents;
+import com.example.project_ui.RoomDataBase.Plan.DataBase;
+import com.example.project_ui.RoomDataBase.Plan.Converters;
+
 
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
     private LinearLayout mContentView;
 
+    private PlanDao planDao;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -53,6 +60,10 @@ public class HomeFragment extends Fragment {
 
         View root = binding.getRoot();
         mContentView = root.findViewById(R.id.contentView_home);
+
+        DataBase db = Room.databaseBuilder(getContext(),DataBase.class, "PlanData.db").build();
+        planDao = db.planDao();
+
         run();
         return root;
     }
@@ -105,6 +116,18 @@ public class HomeFragment extends Fragment {
             }
             row_data.add("");///////////////////////////////data_input
             form_data.add(row_data);
+        }
+
+        // load if data of today exists
+        new Thread(() -> {
+            if(planDao.getByDate(date) != null) {
+                cloneArrArr(Converters.fromString(planDao.getByDate(date).event), form_data);
+            }
+        }).start();
+        try {
+            Thread.sleep(30);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
         //配置格子大小
@@ -203,6 +226,10 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         data.get(row).set(1, "");
+                        // TODO: delete from database
+                        new Thread(() -> {
+                            planDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
+                        }).start();
                         ltb.setTableDatas(data);
                     }
                 });
@@ -229,6 +256,13 @@ public class HomeFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
 
                 data.get(row).set(1, editText.getText().toString());
+                // TODO: add to database
+                new Thread(() -> {
+                    if(planDao.getByDate(data.get(1).get(1)) == null)
+                        planDao.insertData(data.get(1).get(1), Converters.fromArrayList(data));
+                    else
+                        planDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
+                }).start();
                 ltb.setTableDatas(data);
             }
         });
@@ -256,8 +290,27 @@ public class HomeFragment extends Fragment {
                     d = String.valueOf(dayOfMonth);
                 }
                 data.get(1).set(1, year + " / " + m + " / " + d); //若無該日期則為空資料串，新增此數據
+                // load data if exists
+                new Thread(() -> {
+                    if(planDao.getByDate(data.get(1).get(1)) == null) {
+                        for (int i = 2; i <= 26; i++)
+                            data.get(i).set(1, "");
+                    }else {
+                        cloneArrArr(Converters.fromString(planDao.getByDate(data.get(1).get(1)).event), data);
+                    }
+                }).start();
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 ltb.setTableDatas(data);
             }
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE)).show();
+    }
+    private void cloneArrArr(ArrayList<ArrayList<String>> src, ArrayList<ArrayList<String>>des){
+        for(int i=0; i<27; i++){
+            des.set(i, (ArrayList<String>)src.get(i).clone());
+        }
     }
 }

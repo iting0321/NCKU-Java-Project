@@ -1,4 +1,4 @@
-package com.example.myapplicationtest20240522.RoomDataBase.Todo;
+package com.example.project_ui.RoomDataBase.Todo;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;

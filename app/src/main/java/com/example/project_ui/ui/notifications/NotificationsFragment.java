@@ -2,12 +2,14 @@ package com.example.project_ui.ui.notifications;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -15,8 +17,13 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import com.example.project_ui.R;
+import com.example.project_ui.RoomDataBase.Todo.DataBase;
+import com.example.project_ui.RoomDataBase.Todo.TodoDao;
+import com.example.project_ui.RoomDataBase.Todo.TodoEvents;
+
 import com.example.project_ui.databinding.FragmentNotificationsBinding;
 import com.example.project_ui.ui.notifications.Notifications.LanguageRVAdapter;
 import com.google.android.material.snackbar.Snackbar;
@@ -32,6 +39,9 @@ public class NotificationsFragment extends Fragment {
     private Button addBtn;
     private ArrayList<String> lngList;
 
+    private TodoDao todoDao;
+
+
 
     private FragmentNotificationsBinding binding;
 
@@ -40,6 +50,9 @@ public class NotificationsFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notifications, container, false);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+
+        DataBase db = Room.databaseBuilder(getContext(), DataBase.class, "TodoData.db").allowMainThreadQueries().build();
+        todoDao = db.todoDao();
 
         recyclerView = view.findViewById(R.id.recycler_view);
         addEdt = view.findViewById(R.id.idEdtAdd);
@@ -50,6 +63,7 @@ public class NotificationsFragment extends Fragment {
 
         lngRVAdapter = new LanguageRVAdapter(lngList);
         recyclerView.setAdapter(lngRVAdapter);
+        recover();
 
         // on below line we are adding click listener for our add button.
         addBtn.setOnClickListener(new View.OnClickListener() {
@@ -57,8 +71,11 @@ public class NotificationsFragment extends Fragment {
             public void onClick(View v) {
                 // on below line we are calling
                 // add item method.
-                addItem(addEdt.getText().toString());
-
+                String addStr = addEdt.getText().toString();
+                addItem(addStr);
+                // add to database
+                TodoEvents todoEvents = new TodoEvents(addStr);
+                todoDao.insertData(todoEvents);
             }
         });
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -78,6 +95,9 @@ public class NotificationsFragment extends Fragment {
                 // below line is to get the position
                 // of the item at that position.
                 int position = viewHolder.getAdapterPosition();
+
+                // delete from database
+                todoDao.deleteData(lngList.get(position));
 
                 // this method is called when item is swiped.
                 // below line is to remove item from our array list.
@@ -129,6 +149,12 @@ public class NotificationsFragment extends Fragment {
     }
 
 
+    private void recover(){
+        ArrayList<TodoEvents> allEvents = new ArrayList<>(todoDao.getAll());
+        for (TodoEvents event:allEvents) {
+            addItem(event.getEvent());
+        }
+    }
 }
 
 

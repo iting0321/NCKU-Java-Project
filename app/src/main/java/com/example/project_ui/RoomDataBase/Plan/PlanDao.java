@@ -1,10 +1,11 @@
-package com.example.myapplicationtest20240522.RoomDataBase.Plan;
+package com.example.project_ui.RoomDataBase.Plan;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Dao
@@ -12,21 +13,21 @@ public interface PlanDao {
     String tableName = "PlanEvents";
 
     // insert
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertData(PlanEvents planEvents);
+    @Query("INSERT INTO "+tableName+"(date,event) VALUES(:date,:events)")
+    void insertData(String date, String events);
 
     // query
     @Query("SELECT * FROM " + tableName)
     List<PlanEvents> getAll();
-    @Query("SELECT * FROM " + tableName + " WHERE id = :id")
-    PlanEvents getById(int id);
+    @Query("SELECT * FROM " + tableName + " WHERE date = :date")
+    PlanEvents getByDate(String date);
 
     // update
-    @Query("UPDATE " + tableName + " SET id = :id")
-    void updateById(int id);
+    @Query("UPDATE "+tableName+" SET event = :event WHERE date = :date")
+    void updateByDate(String date, String event);
 
     // delete
-    @Query("DELETE  FROM " + tableName + " WHERE id = :id")
-    void deleteData(int id);
+    @Query("DELETE  FROM " + tableName + " WHERE date = :date")
+    void deleteData(String date);
 
 }
