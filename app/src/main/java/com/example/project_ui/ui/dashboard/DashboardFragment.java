@@ -232,7 +232,7 @@ public class DashboardFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         data.get(row).set(1, "");
-                        // TODO: delete from database
+                        // delete from database
                         new Thread(() -> {
                             recordDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
                         }).start();
@@ -262,7 +262,7 @@ public class DashboardFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
 
                 data.get(row).set(1, editText.getText().toString());
-                // TODO: add to database
+                // add to database
                 new Thread(() -> {
                     if(recordDao.getByDate(data.get(1).get(1)) == null)
                         recordDao.insertData(data.get(1).get(1), Converters.fromArrayList(data));

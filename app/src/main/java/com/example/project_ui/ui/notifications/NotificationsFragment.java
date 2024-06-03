@@ -114,6 +114,10 @@ public class NotificationsFragment extends Fragment {
                         // below line is to add our item to array list with a position.
                         lngList.add(position, deletedCourse);
 
+                        // add to database
+                        TodoEvents todoEvents = new TodoEvents(lngList.get(position));
+                        todoDao.insertData(todoEvents);
+
                         // below line is to notify item is
                         // added to our adapter class.
                         lngRVAdapter.notifyItemInserted(position);

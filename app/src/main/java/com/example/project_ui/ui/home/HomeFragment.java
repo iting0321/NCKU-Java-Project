@@ -226,7 +226,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         data.get(row).set(1, "");
-                        // TODO: delete from database
+                        // delete from database
                         new Thread(() -> {
                             planDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
                         }).start();
@@ -256,7 +256,7 @@ public class HomeFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
 
                 data.get(row).set(1, editText.getText().toString());
-                // TODO: add to database
+                // add to database
                 new Thread(() -> {
                     if(planDao.getByDate(data.get(1).get(1)) == null)
                         planDao.insertData(data.get(1).get(1), Converters.fromArrayList(data));
