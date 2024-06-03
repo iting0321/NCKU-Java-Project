@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Project_UI</string>
+    <string name="app_name">Time Ledger</string>
     <string name="title_home">Schedule</string>
     <string name="title_dashboard">Record</string>
     <string name="title_notifications">ToDo</string>
