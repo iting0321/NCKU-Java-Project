@@ -15,8 +15,7 @@
         android:layout_margin="4dp"
         android:layout_toStartOf="@id/idBtnAdd"
         android:hint="Add item"
-        android:minHeight="48dp"
-        android:textColorHint="@color/black" />
+        android:minHeight="48dp"/>
     <Button
         android:id="@+id/idBtnAdd"
         android:layout_width="wrap_content"
