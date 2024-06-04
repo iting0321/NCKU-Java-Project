@@ -47,6 +47,7 @@ import com.example.project_ui.RoomDataBase.Plan.Converters;
 
 public class HomeFragment extends Fragment {
 
+    private static final int ROWNUM = 33;
     private FragmentHomeBinding binding;
     private LinearLayout mContentView;
 
@@ -102,17 +103,30 @@ public class HomeFragment extends Fragment {
         String format = "yyyy / MM / dd";
         Calendar c = Calendar.getInstance();
         SimpleDateFormat date_format = new SimpleDateFormat(format);
-        String date = date_format.format(c.getTime());
+        int hour = c.get(Calendar.HOUR_OF_DAY);
+        String date;
+        if(hour >= 6){
+
+            date = date_format.format(c.getTime());
+        }
+        else{
+            c.add(Calendar.DATE, -1);
+            date = date_format.format(c.getTime());
+        }
         date_row.add(date);
         form_data.add(date_row);
-        for(int i = 0; i <= 24; i++){
+        for(int i = 0; i <= ROWNUM-3; i++){
             ArrayList<String> row_data = new ArrayList<String>();
-            if(i < 10){
-                row_data.add("0" + i + "  ：00 ~ 0" + i + "  ：59");
+            if(i < 4){
+                row_data.add("0" + (i + 6) + "：00 ~ 0" + (i + 6) + "：59");
             }
-            else if(i == 24) row_data.add("");
+            else if(i < 18){
+                row_data.add((i + 6) + "：00 ~ " + (i + 6) + "：59");
+            }
+            else if(i == 18) row_data.add("00：00 ~ 00：59");
+            else if(i == 19) row_data.add("01：00 ~ 01：59");
             else{
-                row_data.add(i + "  ：00 ~ " + i + "  ：59");
+                row_data.add("");
             }
             row_data.add("");///////////////////////////////data_input
             form_data.add(row_data);
@@ -175,7 +189,7 @@ public class HomeFragment extends Fragment {
                     //調用日期選擇功能
                     callCalendar(view, form_data, mLockTableView);
                 }
-                else if(i != 26 && i != 0){
+                else if(i != ROWNUM-1 && i != 0){
                     LayoutInflater inf = LayoutInflater.from(requireContext());
                     final View dialog = inf.inflate(R.layout.pop_up_window, null);
                     if(form_data.get(i).get(1).isEmpty()){//無事件則出現填寫視窗
@@ -226,7 +240,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         data.get(row).set(1, "");
-                        // delete from database
+                        // delete from database (update)
                         new Thread(() -> {
                             planDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
                         }).start();
@@ -245,17 +259,22 @@ public class HomeFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setCancelable(true);
         builder.setIcon(R.drawable.edit_icon);
-        builder.setTitle(data.get(row).get(0));
+        builder.setTitle(data.get(1).get(1));
         builder.setView(view);
+        EditText editTime = (EditText) view.findViewById(R.id.time_text);
         EditText editText = (EditText) view.findViewById(R.id.event_text);
+        if(!data.get(row).get(0).isEmpty()){
+            editTime.setText(data.get(row).get(0));
+        }
         if(!data.get(row).get(1).isEmpty()){
             editText.setText(data.get(row).get(1));
         }
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
+                data.get(row).set(0, editTime.getText().toString());
                 data.get(row).set(1, editText.getText().toString());
+
                 // add to database
                 new Thread(() -> {
                     if(planDao.getByDate(data.get(1).get(1)) == null)
@@ -290,11 +309,11 @@ public class HomeFragment extends Fragment {
                     d = String.valueOf(dayOfMonth);
                 }
                 data.get(1).set(1, year + " / " + m + " / " + d); //若無該日期則為空資料串，新增此數據
+
                 // load data if exists
                 new Thread(() -> {
                     if(planDao.getByDate(data.get(1).get(1)) == null) {
-                        for (int i = 2; i <= 26; i++)
-                            data.get(i).set(1, "");
+                        timeSet(data);
                     }else {
                         cloneArrArr(Converters.fromString(planDao.getByDate(data.get(1).get(1)).event), data);
                     }
@@ -308,9 +327,33 @@ public class HomeFragment extends Fragment {
             }
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE)).show();
     }
-    private void cloneArrArr(ArrayList<ArrayList<String>> src, ArrayList<ArrayList<String>>des){
-        for(int i=0; i<27; i++){
+    private boolean cloneArrArr(ArrayList<ArrayList<String>> src, ArrayList<ArrayList<String>>des){
+        if(src.size() != des.size())  // clone fail
+            return false;
+
+        for(int i=0; i<src.size(); i++){
             des.set(i, (ArrayList<String>)src.get(i).clone());
+        }
+        return true;
+    }
+
+    private void timeSet(ArrayList<ArrayList<String>> data){
+        for(int i = 2; i < ROWNUM; i++){
+            // reset time
+            if(i < 6){
+                data.get(i).set(0, "0" + (i + 4) + "：00 ~ 0" + (i + 4) + "：59");
+            }
+            else if(i < 20){
+                data.get(i).set(0, (i + 4) + "：00 ~ " + (i + 4) + "：59");
+            }
+            else if(i == 20) data.get(i).set(0, "00：00 ~ 00：59");
+            else if(i == 21) data.get(i).set(0, "01：00 ~ 01：59");
+            else{
+                data.get(i).set(0, "");
+            }
+
+            // clean events
+            data.get(i).set(1,"");
         }
     }
 }
