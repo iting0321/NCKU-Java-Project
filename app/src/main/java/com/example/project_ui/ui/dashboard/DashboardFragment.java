@@ -128,7 +128,7 @@ public class DashboardFragment extends Fragment {
         // load if data of today exists
         new Thread(() -> {
             if(recordDao.getByDate(date) != null) {
-                cloneArrArr(Converters.fromString(recordDao.getByDate(date).event), record_from);
+                cloneArrArr(Converters.fromString(recordDao.getByDate(date).getEvent()), record_from);
             }
         }).start();
         try {
@@ -304,7 +304,7 @@ public class DashboardFragment extends Fragment {
                         for (int i = 2; i <= 26; i++)
                             data.get(i).set(1, "");
                     }else {
-                        cloneArrArr(Converters.fromString(recordDao.getByDate(data.get(1).get(1)).event), data);
+                        cloneArrArr(Converters.fromString(recordDao.getByDate(data.get(1).get(1)).getEvent()), data);
                     }
                 }).start();
                 try {

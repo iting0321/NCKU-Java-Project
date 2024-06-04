@@ -14,7 +14,7 @@ public class PlanEvents {
     @NonNull
     public String date;
 
-    public String event;
+    private String event;
     public PlanEvents(String date, String event) {
         this.date = date;
         this.event = event;

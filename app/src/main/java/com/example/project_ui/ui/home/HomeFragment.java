@@ -121,7 +121,7 @@ public class HomeFragment extends Fragment {
         // load if data of today exists
         new Thread(() -> {
             if(planDao.getByDate(date) != null) {
-                cloneArrArr(Converters.fromString(planDao.getByDate(date).event), form_data);
+                cloneArrArr(Converters.fromString(planDao.getByDate(date).getEvent()), form_data);
             }
         }).start();
         try {
@@ -296,7 +296,7 @@ public class HomeFragment extends Fragment {
                         for (int i = 2; i <= 26; i++)
                             data.get(i).set(1, "");
                     }else {
-                        cloneArrArr(Converters.fromString(planDao.getByDate(data.get(1).get(1)).event), data);
+                        cloneArrArr(Converters.fromString(planDao.getByDate(data.get(1).get(1)).getEvent()), data);
                     }
                 }).start();
                 try {
