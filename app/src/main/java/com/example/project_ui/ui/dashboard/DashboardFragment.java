@@ -101,7 +101,7 @@ public class DashboardFragment extends Fragment {
         ArrayList<ArrayList<String>> record_from = new ArrayList<ArrayList<String>>();
         ArrayList<String> first_row = new ArrayList<String>();
         first_row.add("Time");
-        first_row.add("Event");
+        first_row.add("Record");
         record_from.add(first_row);
         ArrayList<String> date_row = new ArrayList<String>();
         date_row.add("");//Next_is_date
@@ -272,6 +272,8 @@ public class DashboardFragment extends Fragment {
         }
         if(!data.get(row).get(1).isEmpty()){
             editText.setText(data.get(row).get(1));
+        }else{
+            editText.setHint("add record");
         }
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
