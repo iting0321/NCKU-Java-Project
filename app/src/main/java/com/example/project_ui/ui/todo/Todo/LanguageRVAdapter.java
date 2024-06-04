@@ -1,6 +1,5 @@
-package com.example.project_ui.ui.notifications.Notifications;
+package com.example.project_ui.ui.todo.Todo;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

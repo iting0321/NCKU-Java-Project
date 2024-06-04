@@ -1,21 +1,17 @@
-package com.example.project_ui.ui.notifications;
+package com.example.project_ui.ui.todo;
 
-import android.content.Context;
+import static com.example.project_ui.RoomDataBase.Todo.DataBase.DB_NAME;
+
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
@@ -24,15 +20,14 @@ import com.example.project_ui.RoomDataBase.Todo.DataBase;
 import com.example.project_ui.RoomDataBase.Todo.TodoDao;
 import com.example.project_ui.RoomDataBase.Todo.TodoEvents;
 
-import com.example.project_ui.databinding.FragmentNotificationsBinding;
-import com.example.project_ui.ui.notifications.Notifications.LanguageRVAdapter;
+import com.example.project_ui.databinding.FragmentTodoBinding;
+import com.example.project_ui.ui.todo.Todo.LanguageRVAdapter;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.lang.String;
-import java.util.List;
 
-public class NotificationsFragment extends Fragment {
+public class TodoFragment extends Fragment {
     private RecyclerView recyclerView;
     private LanguageRVAdapter lngRVAdapter;
     private EditText addEdt;
@@ -43,15 +38,15 @@ public class NotificationsFragment extends Fragment {
 
 
 
-    private FragmentNotificationsBinding binding;
+    private FragmentTodoBinding binding;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_notifications, container, false);
+        View view = inflater.inflate(R.layout.fragment_todo, container, false);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 
-        DataBase db = Room.databaseBuilder(getContext(), DataBase.class, "TodoData.db").allowMainThreadQueries().build();
+        DataBase db = Room.databaseBuilder(getContext(), DataBase.class, DB_NAME).allowMainThreadQueries().build();
         todoDao = db.todoDao();
 
         recyclerView = view.findViewById(R.id.recycler_view);

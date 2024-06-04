@@ -1,10 +1,10 @@
-package com.example.project_ui.RoomDataBase.Plan;
+package com.example.project_ui.RoomDataBase.Schedule;
 
 import androidx.room.TypeConverter;
 import androidx.room.ProvidedTypeConverter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+
 @ProvidedTypeConverter
 public class Converters {
     @TypeConverter

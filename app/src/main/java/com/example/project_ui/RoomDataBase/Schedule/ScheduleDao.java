@@ -1,16 +1,13 @@
-package com.example.project_ui.RoomDataBase.Plan;
+package com.example.project_ui.RoomDataBase.Schedule;
 
 import androidx.room.Dao;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Dao
-public interface PlanDao {
-    String tableName = "PlanEvents";
+public interface ScheduleDao {
+    String tableName = "ScheduleEvents";
 
     // insert
     @Query("INSERT INTO "+tableName+"(date,event) VALUES(:date,:events)")
@@ -18,9 +15,9 @@ public interface PlanDao {
 
     // query
     @Query("SELECT * FROM " + tableName)
-    List<PlanEvents> getAll();
+    List<ScheduleEvents> getAll();
     @Query("SELECT * FROM " + tableName + " WHERE date = :date")
-    PlanEvents getByDate(String date);
+    ScheduleEvents getByDate(String date);
 
     // update
     @Query("UPDATE "+tableName+" SET event = :event WHERE date = :date")

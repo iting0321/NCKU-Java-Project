@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="?android:attr/selectableItemBackground"
-    tools:context=".ui.notifications.NotificationsFragment">
+    tools:context=".ui.todo.TodoFragment">
     <EditText
         android:id="@+id/idEdtAdd"
         android:layout_width="match_parent"

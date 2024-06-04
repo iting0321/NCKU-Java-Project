@@ -1,21 +1,17 @@
-package com.example.project_ui.RoomDataBase.Plan;
+package com.example.project_ui.RoomDataBase.Schedule;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
-import androidx.room.TypeConverters;
-import com.example.project_ui.RoomDataBase.Plan.Converters;
 
-import java.util.ArrayList;
-
-@Entity(tableName = "PlanEvents")
-public class PlanEvents {
+@Entity(tableName = "ScheduleEvents")
+public class ScheduleEvents {
     @PrimaryKey
     @NonNull
     public String date;
 
     private String event;
-    public PlanEvents(String date, String event) {
+    public ScheduleEvents(String date, String event) {
         this.date = date;
         this.event = event;
     }

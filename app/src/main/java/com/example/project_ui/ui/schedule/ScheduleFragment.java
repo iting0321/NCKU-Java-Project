@@ -1,37 +1,28 @@
-package com.example.project_ui.ui.dashboard;
+package com.example.project_ui.ui.schedule;
+
+import static com.example.project_ui.RoomDataBase.Schedule.DataBase.DB_NAME;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.room.Room;
 
 import android.util.DisplayMetrics;
 import com.example.project_ui.R;
-import com.example.project_ui.RoomDataBase.Record.RecordDao;
-import com.example.project_ui.RoomDataBase.Record.RecordEvents;
-import com.example.project_ui.databinding.FragmentDashboardBinding;
-import com.example.project_ui.databinding.FragmentHomeBinding;
-import com.example.project_ui.ui.dashboard.DashboardViewModel;
+import com.example.project_ui.databinding.FragmentScheduleBinding;
 import com.rmondjone.locktableview.LockTableView;
 import com.rmondjone.locktableview.DisplayUtil;
 import com.rmondjone.xrecyclerview.ProgressStyle;
@@ -40,35 +31,33 @@ import com.rmondjone.xrecyclerview.XRecyclerView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
 
-import com.example.project_ui.RoomDataBase.Record.DataBase;
-
-import com.example.project_ui.RoomDataBase.Record.Converters;
+import com.example.project_ui.RoomDataBase.Schedule.ScheduleDao;
+import com.example.project_ui.RoomDataBase.Schedule.DataBase;
+import com.example.project_ui.RoomDataBase.Schedule.Converters;
 
 
-public class DashboardFragment extends Fragment {
+public class ScheduleFragment extends Fragment {
 
     private static final int ROWNUM = 33;
-    private FragmentDashboardBinding binding;
-    private LinearLayout recordLayout;
+    private FragmentScheduleBinding binding;
+    private LinearLayout mContentView;
 
-    private RecordDao recordDao;
+    private ScheduleDao scheduleDao;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        DashboardViewModel dashboardViewModel =
-                new ViewModelProvider(this).get(DashboardViewModel.class);
-
-        binding = FragmentDashboardBinding.inflate(inflater, container, false);
+        ScheduleViewModel scheduleViewModel =
+                new ViewModelProvider(this).get(ScheduleViewModel.class);
+        binding = FragmentScheduleBinding.inflate(inflater, container, false);
 
         View root = binding.getRoot();
-        recordLayout = root.findViewById(R.id.contentView_dashboard);
+        mContentView = root.findViewById(R.id.contentView_schedule);
 
-        DataBase db = Room.databaseBuilder(getContext(),DataBase.class, "RecordData.db").build();
-        recordDao = db.recordDao();
+        DataBase db = Room.databaseBuilder(getContext(),DataBase.class, DB_NAME).build();
+        scheduleDao = db.scheduleDao();
 
-        run1();
+        run();
         return root;
     }
 
@@ -78,15 +67,14 @@ public class DashboardFragment extends Fragment {
         binding = null;
     }
 
-    private void run1(){
-
+    private void run(){
         initDisplayOpinion();
 
         /*
-          初始化資料。(80 ~ 104行)
+          初始化資料。(82 ~ 106行)
           可能使用if判斷式，若此時資料為空則以底下方式載入並匯出至資料庫，有資料(ex: date存入)後改以資料庫匯入。
              0  1
-          0  Time  Record
+          0 Time   Event
           1  NULL  date
           2  0~1   NULL
           3  1~2   NULL
@@ -97,12 +85,11 @@ public class DashboardFragment extends Fragment {
           26 NULL  NULL
           因為最底下按鈕會擋到，所以新增index 26確保可檢視完整時段
         */
-
-        ArrayList<ArrayList<String>> record_from = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> form_data = new ArrayList<ArrayList<String>>();
         ArrayList<String> first_row = new ArrayList<String>();
         first_row.add("Time");
-        first_row.add("Record");
-        record_from.add(first_row);
+        first_row.add("Event");
+        form_data.add(first_row);
         ArrayList<String> date_row = new ArrayList<String>();
         date_row.add("");//Next_is_date
         String format = "yyyy / MM / dd";
@@ -119,7 +106,7 @@ public class DashboardFragment extends Fragment {
             date = date_format.format(c.getTime());
         }
         date_row.add(date);
-        record_from.add(date_row);
+        form_data.add(date_row);
         for(int i = 0; i <= ROWNUM-3; i++){
             ArrayList<String> row_data = new ArrayList<String>();
             if(i < 4){
@@ -134,13 +121,13 @@ public class DashboardFragment extends Fragment {
                 row_data.add("");
             }
             row_data.add("");///////////////////////////////data_input
-            record_from.add(row_data);
+            form_data.add(row_data);
         }
 
         // load if data of today exists
         new Thread(() -> {
-            if(recordDao.getByDate(date) != null) {
-                cloneArrArr(Converters.fromString(recordDao.getByDate(date).getEvent()), record_from);
+            if(scheduleDao.getByDate(date) != null) {
+                cloneArrArr(Converters.fromString(scheduleDao.getByDate(date).getEvent()), form_data);
             }
         }).start();
         try {
@@ -149,65 +136,68 @@ public class DashboardFragment extends Fragment {
             throw new RuntimeException(e);
         }
 
+        //配置格子大小
         DisplayMetrics displayMetrics = new DisplayMetrics();
         WindowManager windowManager = (WindowManager)requireContext().getSystemService(Context.WINDOW_SERVICE);
         windowManager.getDefaultDisplay().getMetrics(displayMetrics);
         int screenWidthDp = (int) (displayMetrics.widthPixels /  displayMetrics.density);
 
-        // 计算一半的宽度
-        final LockTableView record_table = new LockTableView(requireContext(), recordLayout, record_from);
-        record_table.setLockFristRow(true);
-        record_table.setTextViewSize(17);
-        record_table.setMinRowHeight(45);
-        record_table.setMaxRowHeight(45);
-        record_table.setColumnWidth(0, screenWidthDp / 2);
-        record_table.setColumnWidth(1, screenWidthDp * 57 / 128);
-        record_table.setTableContentTextColor(R.color.black);
-        record_table.setCellPadding(0);
-        record_table.setNullableString("");
-        record_table.setOnLoadingListener(new LockTableView.OnLoadingListener() {
-            //下拉刷新、上拉加载监听
+
+        final LockTableView mLockTableView = new LockTableView(requireContext(), mContentView, form_data);
+        mLockTableView.setLockFristRow(true);
+        mLockTableView.setTextViewSize(17);
+        mLockTableView.setMinRowHeight(45);
+        mLockTableView.setMaxRowHeight(45);
+        mLockTableView.setColumnWidth(0, screenWidthDp / 2);
+        mLockTableView.setColumnWidth(1, screenWidthDp  * 57 / 128);
+        mLockTableView.setTableContentTextColor(R.color.black);
+        mLockTableView.setCellPadding(0);
+        mLockTableView.setNullableString("");
+
+        mLockTableView.setOnLoadingListener(new LockTableView.OnLoadingListener() {
+            //重整
             @Override
             public void onRefresh(final XRecyclerView mXRecyclerView, final ArrayList<ArrayList<String>> mTableDatas) {
                 //如需更新表格数据调用,部分刷新不会全部重绘
-                record_table.setTableDatas(mTableDatas);
+                mLockTableView.setTableDatas(mTableDatas);
                 //停止刷新
                 mXRecyclerView.refreshComplete();
             }
-
+            //載入更多資料
             @Override
             public void onLoadMore(final XRecyclerView mXRecyclerView, final ArrayList<ArrayList<String>> mTableDatas) {
                 //如需更新表格数据调用,部分刷新不会全部重绘
-                record_table.setTableDatas(mTableDatas);
+                mLockTableView.setTableDatas(mTableDatas);
                 //停止刷新
                 mXRecyclerView.loadMoreComplete();
                 //如果没有更多数据调用
                 mXRecyclerView.setNoMore(true);
             }
         });
-        record_table.setOnItemClickListenter(new LockTableView.OnItemClickListenter() {
+        mLockTableView.setOnItemClickListenter(new LockTableView.OnItemClickListenter() {
             @Override
             public void onItemClick(View view, int i) {
                 if(i == 1){
-                    callCalendar(view, record_from, record_table);
+                    //調用日期選擇功能
+                    callCalendar(view, form_data, mLockTableView);
                 }
                 else if(i != ROWNUM-1 && i != 0){
                     LayoutInflater inf = LayoutInflater.from(requireContext());
                     final View dialog = inf.inflate(R.layout.pop_up_window, null);
-                    if(record_from.get(i).get(1).isEmpty()){//無事件則出現填寫視窗
+                    if(form_data.get(i).get(1).isEmpty()){//無事件則出現填寫視窗
 
-                        callDialog(record_from, dialog, i, record_table);
+                        callDialog(form_data, dialog, i, mLockTableView);
                     }
                     else{
-                        messageBox(record_from, dialog, i, record_table);
+                        check_event(form_data, dialog, i, mLockTableView);
                     }
                 }
             }
         });
-        record_table.show();
-        record_table.getTableScrollView().setPullRefreshEnabled(true);
-        record_table.getTableScrollView().setLoadingMoreEnabled(true);
-        record_table.getTableScrollView().setRefreshProgressStyle(ProgressStyle.SquareSpin);
+        mLockTableView.show();
+        mLockTableView.getTableScrollView().setPullRefreshEnabled(true);
+        mLockTableView.getTableScrollView().setLoadingMoreEnabled(true);
+        mLockTableView.getTableScrollView().setRefreshProgressStyle(ProgressStyle.SquareSpin);
     }
 
     private void initDisplayOpinion() {
@@ -219,46 +209,44 @@ public class DashboardFragment extends Fragment {
         DisplayUtil.screenWidthDip = DisplayUtil.px2dip(requireContext(), dm.widthPixels);
         DisplayUtil.screenHightDip = DisplayUtil.px2dip(requireContext(), dm.heightPixels);
     }
-
-    ///////////////
-    private void messageBox(ArrayList<ArrayList<String>> data, View v, int row, LockTableView ltb) {
+    private void check_event(ArrayList<ArrayList<String>> data, View view, int row, LockTableView ltb){
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(data.get(row).get(0));
         builder.setMessage(data.get(row).get(1));
-        builder.setIcon(R.drawable.messagebox_record);
+        builder.setIcon(R.drawable.messagebox_schedule);
         builder.setPositiveButton("OK", null);
         builder.setNegativeButton("Edit", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                callDialog(data, v, row, ltb);
+                callDialog(data, view, row, ltb);
             }
         });
         builder.setNeutralButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                AlertDialog.Builder delete_record = new AlertDialog.Builder(requireContext());
-                delete_record.setIcon(R.drawable.warning_icon);
-                delete_record.setTitle("Warning：");
-                delete_record.setMessage("Data cannot be recovered after deletion.");
-                delete_record.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                AlertDialog.Builder delete_check = new AlertDialog.Builder(requireContext());
+                delete_check.setIcon(R.drawable.warning_icon);
+                delete_check.setTitle("Warning：");
+                delete_check.setMessage("Data cannot be recovered after deletion.");
+                delete_check.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         data.get(row).set(1, "");
-                        // delete from database
+                        // delete from database (update)
                         new Thread(() -> {
-                            recordDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
+                            scheduleDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
                         }).start();
                         ltb.setTableDatas(data);
                     }
                 });
-                delete_record.setNeutralButton("Cancel", null);
-                delete_record.show();
-            }
 
+                delete_check.setNeutralButton("Cancel", null);
+                delete_check.show();
+            }
         });
         builder.show();
     }
-
+    /* 修改資料視窗 */
     private void callDialog(ArrayList<ArrayList<String>> data, View view, int row, LockTableView ltb){
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setCancelable(true);
@@ -272,8 +260,6 @@ public class DashboardFragment extends Fragment {
         }
         if(!data.get(row).get(1).isEmpty()){
             editText.setText(data.get(row).get(1));
-        }else{
-            editText.setHint("add record");
         }
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
@@ -283,25 +269,24 @@ public class DashboardFragment extends Fragment {
 
                 // add to database
                 new Thread(() -> {
-                    if(recordDao.getByDate(data.get(1).get(1)) == null)
-                        recordDao.insertData(data.get(1).get(1), com.example.project_ui.RoomDataBase.Plan.Converters.fromArrayList(data));
+                    if(scheduleDao.getByDate(data.get(1).get(1)) == null)
+                        scheduleDao.insertData(data.get(1).get(1), Converters.fromArrayList(data));
                     else
-                        recordDao.updateByDate(data.get(1).get(1), com.example.project_ui.RoomDataBase.Plan.Converters.fromArrayList(data));
+                        scheduleDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
                 }).start();
                 ltb.setTableDatas(data);
             }
         });
-        builder.setNeutralButton("取消", null);
+        builder.setNeutralButton("Cancel", null);
         builder.show();
     }
-
     private  void callCalendar(View view, ArrayList<ArrayList<String>> data, LockTableView ltb){
         Calendar calendar = Calendar.getInstance();
+
         new DatePickerDialog(requireContext(), new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                 ////////////////取得該日期之數據
-
                 String m, d;
                 if((month + 1) < 10){
                     m = "0" + String.valueOf(month + 1);
@@ -319,10 +304,10 @@ public class DashboardFragment extends Fragment {
 
                 // load data if exists
                 new Thread(() -> {
-                    if(recordDao.getByDate(data.get(1).get(1)) == null) {
+                    if(scheduleDao.getByDate(data.get(1).get(1)) == null) {
                         timeSet(data);
                     }else {
-                        cloneArrArr(Converters.fromString(recordDao.getByDate(data.get(1).get(1)).getEvent()), data);
+                        cloneArrArr(Converters.fromString(scheduleDao.getByDate(data.get(1).get(1)).getEvent()), data);
                     }
                 }).start();
                 try {
