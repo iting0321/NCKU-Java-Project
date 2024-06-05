@@ -109,14 +109,20 @@ public class ScheduleFragment extends Fragment {
         form_data.add(date_row);
         for(int i = 0; i <= ROWNUM-3; i++){
             ArrayList<String> row_data = new ArrayList<String>();
-            if(i < 4){
-                row_data.add("0" + (i + 6) + "：00 ~ 0" + (i + 6) + "：59");
+            if(i < 3){
+                row_data.add("0" + (i + 6) + "：00 ~ 0" + (i + 7) + "：00");
             }
-            else if(i < 18){
-                row_data.add((i + 6) + "：00 ~ " + (i + 6) + "：59");
+            else if(i == 3){
+                row_data.add("09：00 ~ 10：00");
             }
-            else if(i == 18) row_data.add("00：00 ~ 00：59");
-            else if(i == 19) row_data.add("01：00 ~ 01：59");
+            else if(i < 17){
+                row_data.add((i + 6) + "：00 ~ " + (i + 7) + "：00");
+            }
+            else if(i == 17){
+                row_data.add("23：00 ~ 00：00");
+            }
+            else if(i == 18) row_data.add("00：00 ~ 01：00");
+            else if(i == 19) row_data.add("01：00 ~ 02：00");
             else{
                 row_data.add("");
             }
@@ -332,14 +338,20 @@ public class ScheduleFragment extends Fragment {
     private void timeSet(ArrayList<ArrayList<String>> data){
         for(int i = 2; i < ROWNUM; i++){
             // reset time
-            if(i < 6){
-                data.get(i).set(0, "0" + (i + 4) + "：00 ~ 0" + (i + 4) + "：59");
+            if(i < 5){
+                data.get(i).set(0, "0" + (i + 4) + "：00 ~ 0" + (i + 5) + "：00");
             }
-            else if(i < 20){
-                data.get(i).set(0, (i + 4) + "：00 ~ " + (i + 4) + "：59");
+            else if(i == 5){
+                data.get(i).set(0, "09：00 ~ 10：00");
             }
-            else if(i == 20) data.get(i).set(0, "00：00 ~ 00：59");
-            else if(i == 21) data.get(i).set(0, "01：00 ~ 01：59");
+            else if(i < 19){
+                data.get(i).set(0, (i + 4) + "：00 ~ " + (i + 5) + "：00");
+            }
+            else if(i == 19){
+                data.get(i).set(0, "23：00 ~ 00：00");
+            }
+            else if(i == 20) data.get(i).set(0, "00：00 ~ 01：00");
+            else if(i == 21) data.get(i).set(0, "01：00 ~ 02：00");
             else{
                 data.get(i).set(0, "");
             }
