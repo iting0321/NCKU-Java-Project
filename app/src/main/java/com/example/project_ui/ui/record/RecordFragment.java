@@ -56,7 +56,7 @@ public class RecordFragment extends Fragment {
         View root = binding.getRoot();
         recordLayout = root.findViewById(R.id.contentView_record);
 
-        DataBase db = Room.databaseBuilder(getContext(),DataBase.class, DB_NAME).build();
+        DataBase db = Room.databaseBuilder(getContext(),DataBase.class, DB_NAME).allowMainThreadQueries().build();
         recordDao = db.recordDao();
 
         run1();
@@ -135,15 +135,8 @@ public class RecordFragment extends Fragment {
         }
 
         // load if data of today exists
-        new Thread(() -> {
-            if(recordDao.getByDate(date) != null) {
-                cloneArrArr(Converters.fromString(recordDao.getByDate(date).getEvent()), record_from);
-            }
-        }).start();
-        try {
-            Thread.sleep(30);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        if(recordDao.getByDate(date) != null) {
+            cloneArrArr(Converters.fromString(recordDao.getByDate(date).getEvent()), record_from);
         }
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -242,9 +235,7 @@ public class RecordFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int which) {
                         data.get(row).set(1, "");
                         // delete from database
-                        new Thread(() -> {
-                            recordDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
-                        }).start();
+                        recordDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
                         ltb.setTableDatas(data);
                     }
                 });
@@ -279,12 +270,10 @@ public class RecordFragment extends Fragment {
                 data.get(row).set(1, editText.getText().toString());
 
                 // add to database
-                new Thread(() -> {
-                    if(recordDao.getByDate(data.get(1).get(1)) == null)
-                        recordDao.insertData(data.get(1).get(1), com.example.project_ui.RoomDataBase.Schedule.Converters.fromArrayList(data));
-                    else
-                        recordDao.updateByDate(data.get(1).get(1), com.example.project_ui.RoomDataBase.Schedule.Converters.fromArrayList(data));
-                }).start();
+                if(recordDao.getByDate(data.get(1).get(1)) == null)
+                    recordDao.insertData(data.get(1).get(1), com.example.project_ui.RoomDataBase.Schedule.Converters.fromArrayList(data));
+                else
+                    recordDao.updateByDate(data.get(1).get(1), com.example.project_ui.RoomDataBase.Schedule.Converters.fromArrayList(data));
                 ltb.setTableDatas(data);
             }
         });
@@ -315,17 +304,10 @@ public class RecordFragment extends Fragment {
                 data.get(1).set(1, year + " / " + m + " / " + d); //若無該日期則為空資料串，新增此數據
 
                 // load data if exists
-                new Thread(() -> {
-                    if(recordDao.getByDate(data.get(1).get(1)) == null) {
-                        timeSet(data);
-                    }else {
-                        cloneArrArr(Converters.fromString(recordDao.getByDate(data.get(1).get(1)).getEvent()), data);
-                    }
-                }).start();
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                if(recordDao.getByDate(data.get(1).get(1)) == null) {
+                    timeSet(data);
+                }else {
+                    cloneArrArr(Converters.fromString(recordDao.getByDate(data.get(1).get(1)).getEvent()), data);
                 }
                 ltb.setTableDatas(data);
             }

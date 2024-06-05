@@ -54,7 +54,7 @@ public class ScheduleFragment extends Fragment {
         View root = binding.getRoot();
         mContentView = root.findViewById(R.id.contentView_schedule);
 
-        DataBase db = Room.databaseBuilder(getContext(),DataBase.class, DB_NAME).build();
+        DataBase db = Room.databaseBuilder(getContext(),DataBase.class, DB_NAME).allowMainThreadQueries().build();
         scheduleDao = db.scheduleDao();
 
         run();
@@ -131,15 +131,8 @@ public class ScheduleFragment extends Fragment {
         }
 
         // load if data of today exists
-        new Thread(() -> {
-            if(scheduleDao.getByDate(date) != null) {
-                cloneArrArr(Converters.fromString(scheduleDao.getByDate(date).getEvent()), form_data);
-            }
-        }).start();
-        try {
-            Thread.sleep(30);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        if(scheduleDao.getByDate(date) != null) {
+            cloneArrArr(Converters.fromString(scheduleDao.getByDate(date).getEvent()), form_data);
         }
 
         //配置格子大小
@@ -239,9 +232,8 @@ public class ScheduleFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int which) {
                         data.get(row).set(1, "");
                         // delete from database (update)
-                        new Thread(() -> {
-                            scheduleDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
-                        }).start();
+                        scheduleDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
+
                         ltb.setTableDatas(data);
                     }
                 });
@@ -274,12 +266,11 @@ public class ScheduleFragment extends Fragment {
                 data.get(row).set(1, editText.getText().toString());
 
                 // add to database
-                new Thread(() -> {
-                    if(scheduleDao.getByDate(data.get(1).get(1)) == null)
-                        scheduleDao.insertData(data.get(1).get(1), Converters.fromArrayList(data));
-                    else
-                        scheduleDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
-                }).start();
+                if(scheduleDao.getByDate(data.get(1).get(1)) == null)
+                    scheduleDao.insertData(data.get(1).get(1), Converters.fromArrayList(data));
+                else
+                    scheduleDao.updateByDate(data.get(1).get(1), Converters.fromArrayList(data));
+
                 ltb.setTableDatas(data);
             }
         });
@@ -309,18 +300,12 @@ public class ScheduleFragment extends Fragment {
                 data.get(1).set(1, year + " / " + m + " / " + d); //若無該日期則為空資料串，新增此數據
 
                 // load data if exists
-                new Thread(() -> {
-                    if(scheduleDao.getByDate(data.get(1).get(1)) == null) {
-                        timeSet(data);
-                    }else {
-                        cloneArrArr(Converters.fromString(scheduleDao.getByDate(data.get(1).get(1)).getEvent()), data);
-                    }
-                }).start();
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                if(scheduleDao.getByDate(data.get(1).get(1)) == null) {
+                    timeSet(data);
+                }else {
+                    cloneArrArr(Converters.fromString(scheduleDao.getByDate(data.get(1).get(1)).getEvent()), data);
                 }
+
                 ltb.setTableDatas(data);
             }
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE)).show();
